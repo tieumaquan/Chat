@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Chat Online - Realtime Chat App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans h-full flex flex-col transition-colors duration-200">
+
+    <!-- AUTHENTICATION SCREEN (LOGIN / REGISTER) -->
+    <div id="authContainer" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-md">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 transition-all p-6 md:p-8">
+            
+            <!-- App Logo -->
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-brand-600 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl shadow-lg shadow-brand-500/30 mb-3">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <h2 id="authTitle" class="text-2xl font-bold text-gray-900 dark:text-white">Đăng Nhập Nexus Chat</h2>
+                <p id="authSubtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Trò chuyện thời gian thực cùng mọi người</p>
+            </div>
+
+            <!-- Error Notification Alert -->
+            <div id="authAlert" class="hidden mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded-xl flex items-center space-x-2">
+                <i class="fa-solid fa-circle-exclamation flex-shrink-0 text-sm"></i>
+                <span id="authAlertText">Lỗi khi thao tác!</span>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="authForm" class="space-y-4">
+                <div id="displayNameGroup" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Tên hiển thị (Username)</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="authDisplayName" placeholder="Nhập tên của bạn" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Địa chỉ Email</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="email" id="authEmail" required placeholder="vidu@domain.com" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Mật khẩu</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="password" id="authPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md transition duration-200 flex items-center justify-center space-x-2">
+                    <span id="authSubmitText">Đăng Nhập</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <!-- Switch Tab Login/Register -->
+            <div class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                <span id="authSwitchPrompt">Chưa có tài khoản?</span>
+                <button type="button" id="authSwitchBtn" class="text-brand-600 dark:text-brand-400 font-semibold ml-1 hover:underline">
+                    Đăng ký ngay
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CHAT APP CONTAINER -->
+    <div id="appContainer" class="flex h-screen w-full overflow-hidden opacity-0 pointer-events-none transition-opacity duration-300">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="w-80 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 absolute md:relative z-20 h-full -translate-x-full md:translate-x-0">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base leading-tight">NexusChat</h1>
+                        <span class="text-xs text-green-500 font-medium flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online Community
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button id="themeToggle" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+                    </button>
+                    <button id="closeSidebar" class="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Channel List -->
+            <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2">Kênh Trực Tuyến</div>
+
+                <button class="w-full p-3 rounded-xl flex items-center space-x-3 bg-brand-50 dark:bg-gray-700/60 border border-brand-100 dark:border-gray-600 transition">
+                    <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </div>
+                    <div class="flex-1 min-w-0 text-left">
+                        <h3 class="text-sm font-semibold truncate text-gray-900 dark:text-white">Phòng Trò Chuyện Chung</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Tất cả người dùng online</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Current User Profile Footer -->
+            <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div id="currentUserAvatar" class="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        U
+                    </div>
+                    <div class="min-w-0">
+                        <div id="currentUserName" class="text-sm font-semibold leading-tight truncate">Đang tải...</div>
+                        <div id="currentUserEmail" class="text-[11px] text-gray-400 truncate">user@email.com</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition flex-shrink-0" title="Đăng xuất">
+                    <i class="fa-solid fa-right-from-bracket text-base"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CHAT CONTAINER -->
+        <main class="flex-1 flex flex-col h-full bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+            
+            <!-- Chat Header -->
+            <header class="h-16 px-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur border-b border-gray-200 dark:border-gray-700 flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3">
+                    <button id="openSidebar" class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-earth-americas"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm md:text-base text-gray-900 dark:text-white leading-tight">Phòng Trò Chuyện Chung (Global)</h2>
+                        <span class="text-xs text-green-500 font-medium">Đồng bộ Firebase Realtime</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Messages Stream -->
+            <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                <div class="flex justify-center my-2">
+                    <div class="bg-gray-200/70 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full shadow-sm">
+                        🌐 Kết nối tới cộng đồng online. Tin nhắn sẽ tự động xuất hiện real-time.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attachment Preview Bar -->
+            <div id="attachmentPreviewBar" class="hidden px-4 py-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center space-x-3 overflow-x-auto">
+            </div>
+
+            <!-- Input Controls Area -->
+            <div class="p-3 md:p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 relative">
+                
+                <!-- Drawer Attachment Options Menu -->
+                <div id="attachDrawer" class="hidden absolute bottom-full left-4 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 flex flex-col space-y-1 min-w-[160px] z-30 transition-all">
+                    <button id="btnAttachImage" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 transition">
+                        <i class="fa-solid fa-image text-green-500 w-5"></i>
+                        <span>Hình ảnh</span>
+                    </button>
+                    <button id="btnAttachVideo" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 transition">
+                        <i class="fa-solid fa-video text-blue-500 w-5"></i>
+                        <span>Video</span>
+                    </button>
+                    <button id="btnAttachFile" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 transition">
+                        <i class="fa-solid fa-file text-purple-500 w-5"></i>
+                        <span>Tệp tài liệu</span>
+                    </button>
+                </div>
+
+                <!-- Emoji Picker Panel -->
+                <div id="emojiPicker" class="hidden absolute bottom-full right-16 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-3 grid grid-cols-6 gap-2 z-30 max-w-[240px]">
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">😀</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">😂</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">😍</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">😎</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">👍</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">🔥</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">🎉</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">❤️</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">🙌</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">🤔</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">💡</span>
+                    <span class="emoji-item cursor-pointer text-xl hover:scale-125 transition">🚀</span>
+                </div>
+
+                <!-- Hidden Input Elements -->
+                <input type="file" id="fileInputImage" accept="image/*" class="hidden">
+                <input type="file" id="fileInputVideo" accept="video/*" class="hidden">
+                <input type="file" id="fileInputDocument" accept="*/*" class="hidden">
+
+                <!-- Chat Form -->
+                <form id="chatForm" class="flex items-end space-x-2">
+                    <button type="button" id="toggleAttachBtn" class="p-2.5 text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition flex-shrink-0">
+                        <i class="fa-solid fa-paperclip text-lg"></i>
+                    </button>
+
+                    <div class="flex-1 bg-gray-100 dark:bg-gray-700/70 rounded-2xl p-2 border border-transparent focus-within:border-brand-500 focus-within:bg-white dark:focus-within:bg-gray-700 transition">
+                        <textarea id="messageInput" rows="1" placeholder="Nhập tin nhắn..." class="w-full bg-transparent resize-none focus:outline-none text-sm text-gray-800 dark:text-gray-100 max-h-32 px-2 py-1"></textarea>
+                    </div>
+
+                    <button type="button" id="toggleEmojiBtn" class="p-2.5 text-gray-500 hover:text-yellow-500 dark:text-gray-400 dark:hover:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition flex-shrink-0">
+                        <i class="fa-regular fa-face-smile text-lg"></i>
+                    </button>
+
+                    <button type="submit" id="sendBtn" class="p-3 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-md hover:shadow-lg transition flex-shrink-0 flex items-center justify-center">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    </button>
+                </form>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- LIGHTBOX / MEDIA MODAL -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <button id="closeLightbox" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 p-2">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="lightboxContent" class="max-w-4xl max-h-[90vh] flex items-center justify-center overflow-hidden">
+        </div>
+    </div>
+
+    <!-- FIREBASE SERVICES MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithCustomToken, 
+            signInAnonymously,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            updateProfile,
+            signOut,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            doc, 
+            setDoc, 
+            getDocs 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexus-chat-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:demo"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI References
+        const authContainer = document.getElementById('authContainer');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const authSubmitText = document.getElementById('authSubmitText');
+        const authSwitchPrompt = document.getElementById('authSwitchPrompt');
+        const authSwitchBtn = document.getElementById('authSwitchBtn');
+        const displayNameGroup = document.getElementById('displayNameGroup');
+        const authAlert = document.getElementById('authAlert');
+        const authAlertText = document.getElementById('authAlertText');
+        
+        const appContainer = document.getElementById('appContainer');
+        const currentUserName = document.getElementById('currentUserName');
+        const currentUserEmail = document.getElementById('currentUserEmail');
+        const currentUserAvatar = document.getElementById('currentUserAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const messagesContainer = document.getElementById('messagesContainer');
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        
+        const attachmentPreviewBar = document.getElementById('attachmentPreviewBar');
+        const fileInputImage = document.getElementById('fileInputImage');
+        const fileInputVideo = document.getElementById('fileInputVideo');
+        const fileInputDocument = document.getElementById('fileInputDocument');
+
+        let isRegisterMode = false;
+        let currentUser = null;
+        let pendingAttachment = null;
+        let unsubscribeMessages = null;
+
+        // Auto Authenticaton Setup (Check Initial Auth Token or User State)
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                }
+            } catch (err) {
+                console.warn("Custom token auth failed, relying on email/pass or anonymous fallback", err);
+            }
+        }
+        initAuth();
+
+        // Auth State Observer
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // User is logged in
+                authContainer.classList.add('hidden');
+                appContainer.classList.remove('opacity-0', 'pointer-events-none');
+
+                const name = user.displayName || user.email.split('@')[0];
+                currentUserName.textContent = name;
+                currentUserEmail.textContent = user.email || 'Ẩn danh';
+                currentUserAvatar.textContent = name.charAt(0).toUpperCase();
+
+                // Listen to Firestore Messages
+                subscribeToMessages();
+            } else {
+                // User is logged out
+                authContainer.classList.remove('hidden');
+                appContainer.classList.add('opacity-0', 'pointer-events-none');
+                if (unsubscribeMessages) unsubscribeMessages();
+                messagesContainer.innerHTML = '';
+            }
+        });
+
+        // Toggle Register / Login mode
+        authSwitchBtn.addEventListener('click', () => {
+            isRegisterMode = !isRegisterMode;
+            authAlert.classList.add('hidden');
+            if (isRegisterMode) {
+                authTitle.textContent = "Tạo Tài Khoản Mới";
+                authSubtitle.textContent = "Tham gia cộng đồng Nexus Chat ngay hôm nay";
+                authSubmitText.textContent = "Đăng ký";
+                authSwitchPrompt.textContent = "Đã có tài khoản?";
+                authSwitchBtn.textContent = "Đăng nhập";
+                displayNameGroup.classList.remove('hidden');
+            } else {
+                authTitle.textContent = "Đăng Nhập Nexus Chat";
+                authSubtitle.textContent = "Trò chuyện thời gian thực cùng mọi người";
+                authSubmitText.textContent = "Đăng nhập";
+                authSwitchPrompt.textContent = "Chưa có tài khoản?";
+                authSwitchBtn.textContent = "Đăng ký ngay";
+                displayNameGroup.classList.add('hidden');
+            }
+        });
+
+        // Handle Auth Form Submission
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authAlert.classList.add('hidden');
+
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const displayName = document.getElementById('authDisplayName').value.trim();
+
+            try {
+                if (isRegisterMode) {
+                    if (!displayName) throw new Error("Vui lòng nhập Tên hiển thị!");
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(userCredential.user, { displayName: displayName });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (error) {
+                authAlert.classList.remove('hidden');
+                authAlertText.textContent = formatAuthError(error.code || error.message);
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        function formatAuthError(code) {
+            switch (code) {
+                case 'auth/invalid-email': return 'Địa chỉ Email không hợp lệ.';
+                case 'auth/user-not-found': return 'Tài khoản không tồn tại.';
+                case 'auth/wrong-password': return 'Mật khẩu không chính xác.';
+                case 'auth/email-already-in-use': return 'Email này đã được sử dụng.';
+                case 'auth/weak-password': return 'Mật khẩu phải từ 6 ký tự trở lên.';
+                default: return code;
+            }
+        }
+
+        // --- FIRESTORE REALTIME CHAT ENGINE ---
+        function subscribeToMessages() {
+            if (!currentUser) return;
+
+            // MANDATORY RULE 1: Public Collection Path
+            const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+
+            // MANDATORY RULE 2: Simple Query without Complex orderBy/where
+            unsubscribeMessages = onSnapshot(messagesRef, (snapshot) => {
+                const docs = [];
+                snapshot.forEach(doc => {
+                    docs.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort in JS Memory to avoid compound index requirement
+                docs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+                renderMessages(docs);
+            }, (error) => {
+                console.error("Lỗi Firestore Snapshot:", error);
+            });
+        }
+
+        // Send Message
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const text = messageInput.value.trim();
+            if (!text && !pendingAttachment) return;
+
+            const name = currentUser.displayName || currentUser.email.split('@')[0];
+            const messageData = {
+                uid: currentUser.uid,
+                userName: name,
+                userEmail: currentUser.email,
+                text: text,
+                attachment: pendingAttachment ? pendingAttachment : null,
+                createdAt: Date.now()
+            };
+
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            pendingAttachment = null;
+            renderAttachmentPreview();
+
+            try {
+                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+                await addDoc(messagesRef, messageData);
+            } catch (err) {
+                console.error("Lỗi khi gửi tin nhắn:", err);
+            }
+        });
+
+        // Render Messages in UI
+        function renderMessages(messages) {
+            messagesContainer.innerHTML = `
+                <div class="flex justify-center my-2">
+                    <div class="bg-gray-200/70 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full shadow-sm">
+                        🌐 Kết nối tới cộng đồng online. Tin nhắn tự động đồng bộ.
+                    </div>
+                </div>
+            `;
+
+            messages.forEach(msg => {
+                const isMe = currentUser && msg.uid === currentUser.uid;
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `flex items-start space-x-3 ${isMe ? 'justify-end' : 'justify-start'}`;
+
+                const timeStr = new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Render Attachment
+                let attachHtml = '';
+                if (msg.attachment) {
+                    const att = msg.attachment;
+                    if (att.type === 'image') {
+                        attachHtml = `
+                            <div class="overflow-hidden rounded-xl cursor-pointer max-w-xs hover:opacity-95 transition mb-1" onclick="window.openMediaModal('${att.data}', 'image')">
+                                <img src="${att.data}" class="w-full max-h-60 object-cover rounded-xl">
+                            </div>`;
+                    } else if (att.type === 'video') {
+                        attachHtml = `
+                            <div class="overflow-hidden rounded-xl max-w-xs bg-black mb-1">
+                                <video src="${att.data}" controls class="w-full max-h-60 rounded-xl"></video>
+                            </div>`;
+                    } else if (att.type === 'file') {
+                        attachHtml = `
+                            <div class="flex items-center space-x-3 ${isMe ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700'} p-2.5 rounded-xl border border-gray-200/30 mb-1">
+                                <div class="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center text-white flex-shrink-0">
+                                    <i class="fa-solid fa-file-arrow-down text-base"></i>
+                                </div>
+                                <div class="flex-1 min-w-0 text-left">
+                                    <div class="text-xs font-semibold truncate ${isMe ? 'text-white' : 'text-gray-900 dark:text-gray-100'}">${att.name}</div>
+                                    <div class="text-[10px] opacity-70 ${isMe ? 'text-white' : 'text-gray-500'}">${formatBytes(att.size)}</div>
+                                </div>
+                                <a href="${att.data}" download="${att.name}" class="p-1.5 hover:bg-black/10 rounded-lg transition">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            </div>`;
+                    }
+                }
+
+                // Process Link Preview & Formatting
+                const { formattedText, linkPreviewHtml } = processLinksInText(msg.text || '');
+                const textHtml = msg.text ? `<div class="text-sm leading-relaxed break-words">${formattedText}</div>` : '';
+
+                const bubbleClasses = isMe 
+                    ? 'bg-brand-600 text-white rounded-2xl rounded-tr-none shadow-sm' 
+                    : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-700/60';
+
+                const avatarChar = (msg.userName || 'U').charAt(0).toUpperCase();
+
+                if (isMe) {
+                    messageWrapper.innerHTML = `
+                        <div class="max-w-[85%] md:max-w-[65%] flex flex-col items-end">
+                            <div class="${bubbleClasses} p-3.5">
+                                ${attachHtml}
+                                ${textHtml}
+                                ${linkPreviewHtml}
+                            </div>
+                            <span class="text-[10px] text-gray-400 mt-1">${timeStr}</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
+                            ${avatarChar}
+                        </div>
+                    `;
+                } else {
+                    messageWrapper.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 mt-1">
+                            ${avatarChar}
+                        </div>
+                        <div class="max-w-[85%] md:max-w-[65%]">
+                            <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 ml-1 mb-0.5 block">${msg.userName || 'Ẩn danh'}</span>
+                            <div class="${bubbleClasses} p-3.5">
+                                ${attachHtml}
+                                ${textHtml}
+                                ${linkPreviewHtml}
+                            </div>
+                            <span class="text-[10px] text-gray-400 mt-1 block">${timeStr}</span>
+                        </div>
+                    `;
+                }
+
+                messagesContainer.appendChild(messageWrapper);
+            });
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // File Selection Handlers (Convert to Base64 Data URL)
+        document.getElementById('btnAttachImage').onclick = () => fileInputImage.click();
+        document.getElementById('btnAttachVideo').onclick = () => fileInputVideo.click();
+        document.getElementById('btnAttachFile').onclick = () => fileInputDocument.click();
+
+        fileInputImage.onchange = (e) => handleFileSelect(e.target.files[0], 'image');
+        fileInputVideo.onchange = (e) => handleFileSelect(e.target.files[0], 'video');
+        fileInputDocument.onchange = (e) => handleFileSelect(e.target.files[0], 'file');
+
+        function handleFileSelect(file, type) {
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit for base64 inline firestore document
+                alert("Dung lượng tệp vượt quá 2MB. Vui lòng chọn tệp nhỏ hơn!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                pendingAttachment = {
+                    name: file.name,
+                    size: file.size,
+                    type: type,
+                    data: event.target.result
+                };
+                renderAttachmentPreview();
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('attachDrawer').classList.add('hidden');
+        }
+
+        function renderAttachmentPreview() {
+            if (!pendingAttachment) {
+                attachmentPreviewBar.classList.add('hidden');
+                attachmentPreviewBar.innerHTML = '';
+                return;
+            }
+
+            attachmentPreviewBar.classList.remove('hidden');
+            attachmentPreviewBar.innerHTML = `
+                <div class="relative group flex-shrink-0 w-16 h-16 bg-white dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-600 flex items-center justify-center">
+                    ${pendingAttachment.type === 'image' 
+                        ? `<img src="${pendingAttachment.data}" class="w-full h-full object-cover">` 
+                        : pendingAttachment.type === 'video'
+                        ? `<video src="${pendingAttachment.data}" class="w-full h-full object-cover"></video>`
+                        : `<div class="p-1 text-center"><i class="fa-solid fa-file-lines text-brand-500 text-lg"></i><p class="text-[9px] truncate max-w-[50px] text-gray-600 dark:text-gray-300">${pendingAttachment.name}</p></div>`}
+                    <button type="button" id="removeAttachBtn" class="absolute top-1 right-1 bg-black/60 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-red-500 transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('removeAttachBtn').onclick = () => {
+                pendingAttachment = null;
+                renderAttachmentPreview();
+            };
+        }
+
+        // Helper Functions
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function processLinksInText(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            let hasLink = false;
+            let firstUrl = '';
+
+            const formattedText = text.replace(urlRegex, (url) => {
+                hasLink = true;
+                if (!firstUrl) firstUrl = url;
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-brand-300 dark:text-brand-400 underline font-medium break-all hover:opacity-80">${url}</a>`;
+            });
+
+            let linkPreviewHtml = '';
+            if (hasLink && firstUrl) {
+                let domain = firstUrl;
+                try { domain = new URL(firstUrl).hostname; } catch(e) {}
+                
+                linkPreviewHtml = `
+                    <a href="${firstUrl}" target="_blank" class="mt-2 block border border-gray-200/40 bg-black/10 rounded-xl overflow-hidden hover:opacity-90 transition">
+                        <div class="p-2.5 flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-globe text-sm"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="text-xs font-semibold truncate">${domain}</div>
+                                <div class="text-[10px] opacity-80 truncate">${firstUrl}</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+            return { formattedText, linkPreviewHtml };
+        }
+
+        // Lightbox Modal
+        window.openMediaModal = function(url, type) {
+            const lb = document.getElementById('lightbox');
+            const content = document.getElementById('lightboxContent');
+            content.innerHTML = `<img src="${url}" class="max-w-full max-h-[85vh] object-contain rounded-lg">`;
+            lb.classList.remove('hidden');
+        };
+
+        document.getElementById('closeLightbox').onclick = () => document.getElementById('lightbox').classList.add('hidden');
+    </script>
+
+    <!-- DOM INTERACTION LOGIC -->
+    <script>
+        // Sidebar & UI Toggles
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('openSidebar').onclick = () => sidebar.classList.remove('-translate-x-full');
+        document.getElementById('closeSidebar').onclick = () => sidebar.classList.add('-translate-x-full');
+        document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
+
+        // Attachment Drawer & Emoji Picker Toggle
+        const attachDrawer = document.getElementById('attachDrawer');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const toggleAttachBtn = document.getElementById('toggleAttachBtn');
+        const toggleEmojiBtn = document.getElementById('toggleEmojiBtn');
+        const messageInput = document.getElementById('messageInput');
+
+        toggleAttachBtn.onclick = (e) => {
+            e.stopPropagation();
+            attachDrawer.classList.toggle('hidden');
+            emojiPicker.classList.add('hidden');
+        };
+
+        toggleEmojiBtn.onclick = (e) => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('hidden');
+            attachDrawer.classList.add('hidden');
+        };
+
+        document.onclick = (e) => {
+            if (!attachDrawer.contains(e.target) && e.target !== toggleAttachBtn) attachDrawer.classList.add('hidden');
+            if (!emojiPicker.contains(e.target) && e.target !== toggleEmojiBtn) emojiPicker.classList.add('hidden');
+        };
+
+        document.querySelectorAll('.emoji-item').forEach(emoji => {
+            emoji.onclick = () => {
+                messageInput.value += emoji.textContent;
+                messageInput.focus();
+                emojiPicker.classList.add('hidden');
+            };
+        });
+    </script>
+</body>
+</html>
